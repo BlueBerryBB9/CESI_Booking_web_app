@@ -164,10 +164,7 @@ router.put("/:id", async (req, res) => {
     if (endDate) booking.endDate = endDate;
 
     await booking.save();
-    const updated = await booking.populate("userId", "nom email");
-    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-    await sleep(2000)
-    console.log(updated);
+    const updated = await booking.populate("offerId");
 
     res.status(200).json({
       status: 200,
