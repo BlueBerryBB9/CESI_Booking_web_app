@@ -30,8 +30,11 @@ import {
   LocationOn,
   Star,
 } from "@mui/icons-material";
+import api from "./services/api";
+import { useAuth } from "./context/AuthContext";
 
 function Booking() {
+  const { user } = useAuth();
   const [searchType, setSearchType] = useState(0); // 0: hebergement, 1: activite, 2: transport
   const [searchParams, setSearchParams] = useState({
     destination: "",
@@ -51,57 +54,88 @@ function Booking() {
     commentaires: "",
   });
 
-  const searchTypes = ["hebergement", "activite", "transport"];
+  const searchTypes = ["place", "activity", "transportation"];
 
-  // TODO: Appel API pour rechercher selon le type (hébergement, activité, transport)
+  // Appel API pour rechercher selon le type (hébergement, activité, transport)
   const handleSearch = async (e) => {
     e.preventDefault();
 
-    console.log("Recherche:", {
-      type: searchTypes[searchType],
-      ...searchParams,
-    });
+    try {
+      const filters = {
+        type: searchTypes[searchType],
+      };
 
-    // Simulation temporaire pour l'UI
-    setResults([
-      {
-        id: 1,
-        nom: "Villa Paradisiaque",
-        prix: 150,
+      // Ajouter le filtre de ville si renseigné
+      if (searchParams.destination) {
+        filters.city = searchParams.destination;
+      }
+
+      const response = await api.offers.getAll(filters);
+      
+      // Transform data for UI compatibility
+      const transformedResults = response.data.map(offer => ({
+        id: offer._id,
+        nom: offer.title,
+        description: offer.description,
+        prix: offer.price,
         disponible: true,
-        rating: 4.8,
-      },
-      {
-        id: 2,
-        nom: "Appartement Vue Mer",
-        prix: 95,
-        disponible: true,
-        rating: 4.5,
-      },
-      {
-        id: 3,
-        nom: "Hôtel de Luxe",
-        prix: 220,
-        disponible: true,
-        rating: 4.9,
-      },
-    ]);
+        rating: 4.5, // Default rating since it's not in your schema
+        location: offer.location,
+        type: offer.type,
+      }));
+
+      setResults(transformedResults);
+    } catch (error) {
+      console.error("Erreur lors de la recherche:", error);
+      alert("Erreur lors de la recherche: " + error.message);
+    }
   };
 
-  // TODO: Appel API pour récupérer les détails complets d'un item GET
+  // Appel API pour récupérer les détails complets d'un item GET
   const handleItemClick = async (item) => {
-    setSelectedItem(item);
-    setShowModal(true);
+    try {
+      const response = await api.offers.getById(item.id);
+      setSelectedItem({
+        ...item,
+        fullDetails: response.data,
+      });
+      setShowModal(true);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des détails:", error);
+      alert("Erreur lors de la récupération des détails: " + error.message);
+    }
   };
 
-  // TODO: Appel API pour créer une réservation POST
+  // Appel API pour créer une réservation POST
   const handleReservation = async (e) => {
     e.preventDefault();
-    setShowModal(false);
-    setShowPaymentModal(true);
+
+    try {
+      // Vérifier que l'utilisateur est connecté
+      if (!user) {
+        alert("Vous devez être connecté pour faire une réservation");
+        return;
+      }
+
+      const bookingData = {
+        userId: user.id,
+        offerId: selectedItem.id,
+        startDate: searchParams.dateDebut,
+        endDate: searchParams.dateFin,
+        quantity: searchParams.personnes,
+      };
+
+      await api.bookings.create(bookingData);
+      
+      setShowModal(false);
+      setShowPaymentModal(true);
+    } catch (error) {
+      console.error("Erreur lors de la création de la réservation:", error);
+      alert("Erreur lors de la réservation: " + error.message);
+    }
   };
 
-  // TODO: Appel API pour traiter le paiement (simulation)
+  // Appel API pour traiter le paiement (simulation)
   const handlePayment = async (e) => {
     e.preventDefault();
 

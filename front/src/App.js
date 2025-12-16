@@ -22,13 +22,16 @@ import {
   ListItemText,
   useMediaQuery,
   useTheme,
+  CircularProgress,
 } from "@mui/material";
 import {
   Login,
   Menu as MenuIcon,
+  Logout,
 } from "@mui/icons-material";
 import SignIn from "./SignIn";
 import Booking from "./Booking";
+import { useAuth } from "./context/AuthContext";
 
 function App() {
   return (
@@ -54,28 +57,56 @@ function Navbar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, logout, loading } = useAuth();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+    handleDrawerToggle();
   };
 
   // Menu mobile (Drawer)
   const drawer = (
     <Box sx={{ width: 250 }}>
       <List>
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => {
-              navigate("/signin");
-              handleDrawerToggle();
-            }}
-          >
-            <ListItemIcon sx={{ color: "#667eea" }}>
-              <Login />
-            </ListItemIcon>
-            <ListItemText primary="Connexion" />
-          </ListItemButton>
-        </ListItem>
+        {user ? (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton disabled>
+                <ListItemIcon sx={{ color: "#667eea" }}>
+                  <Login />
+                </ListItemIcon>
+                <ListItemText primary={`${user.nom || user.email}`} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={handleLogout}>
+                <ListItemIcon sx={{ color: "#667eea" }}>
+                  <Logout />
+                </ListItemIcon>
+                <ListItemText primary="Déconnexion" />
+              </ListItemButton>
+            </ListItem>
+          </>
+        ) : (
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => {
+                navigate("/signin");
+                handleDrawerToggle();
+              }}
+            >
+              <ListItemIcon sx={{ color: "#667eea" }}>
+                <Login />
+              </ListItemIcon>
+              <ListItemText primary="Connexion" />
+            </ListItemButton>
+          </ListItem>
+        )}
       </List>
     </Box>
   );
@@ -116,27 +147,58 @@ function Navbar() {
             {/* Menu Desktop */}
             {!isMobile ? (
               <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                <Button
-                  variant="contained"
-                  startIcon={<Login />}
-                  onClick={() => navigate("/signin")}
-                  sx={{
-                    background:
-                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                    textTransform: "none",
-                    px: 3,
-                    fontWeight: 600,
-                    transition: "all 0.3s",
-                    "&:hover": {
+                {loading ? (
+                  <CircularProgress size={24} />
+                ) : user ? (
+                  <>
+                    <Typography variant="body2" sx={{ color: "#667eea", fontWeight: 600 }}>
+                      {user.nom || user.email}
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      startIcon={<Logout />}
+                      onClick={handleLogout}
+                      sx={{
+                        background:
+                          "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                        textTransform: "none",
+                        px: 3,
+                        fontWeight: 600,
+                        transition: "all 0.3s",
+                        "&:hover": {
+                          background:
+                            "linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%)",
+                          transform: "translateY(-2px)",
+                          boxShadow: "0 5px 15px rgba(102, 126, 234, 0.4)",
+                        },
+                      }}
+                    >
+                      Déconnexion
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    variant="contained"
+                    startIcon={<Login />}
+                    onClick={() => navigate("/signin")}
+                    sx={{
                       background:
-                        "linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%)",
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 5px 15px rgba(102, 126, 234, 0.4)",
-                    },
-                  }}
-                >
-                  Connexion
-                </Button>
+                        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                      textTransform: "none",
+                      px: 3,
+                      fontWeight: 600,
+                      transition: "all 0.3s",
+                      "&:hover": {
+                        background:
+                          "linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%)",
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 5px 15px rgba(102, 126, 234, 0.4)",
+                      },
+                    }}
+                  >
+                    Connexion
+                  </Button>
+                )}
               </Box>
             ) : (
               // Menu Mobile - Hamburger Icon

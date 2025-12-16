@@ -13,9 +13,12 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Login, PersonAdd } from "@mui/icons-material";
+import api from "./services/api";
+import { useAuth } from "./context/AuthContext";
 
 function SignIn() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [isSignIn, setIsSignIn] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -46,24 +49,13 @@ function SignIn() {
     if (isSignIn) {
       // ========== CONNEXION ==========
       try {
-        const response = await fetch("http://localhost:5000/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-          }),
+        const data = await api.auth.login({
+          email: formData.email,
+          password: formData.password,
         });
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || "Erreur de connexion");
-        }
-
-        // Stocker le token et les infos utilisateur
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
+        // Use auth context to cache token and user
+        login(data.user, data.token);
 
         setSuccess("Connexion réussie ! Redirection...");
 
@@ -87,24 +79,11 @@ function SignIn() {
       }
 
       try {
-        const response = await fetch(
-          "http://localhost:5000/api/auth/register",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              nom: formData.username,
-              email: formData.email,
-              password: formData.password,
-            }),
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || "Erreur d'inscription");
-        }
+        await api.auth.register({
+          nom: formData.username,
+          email: formData.email,
+          password: formData.password,
+        });
 
         setSuccess(
           "Inscription réussie ! Vous pouvez maintenant vous connecter."

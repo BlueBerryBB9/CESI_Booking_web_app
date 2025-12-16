@@ -22,7 +22,33 @@ router.post("/register", async (req, res) => {
     const newUser = new User({ nom, email, password: hashedPassword });
     await newUser.save();
 
-    // Optionnel : On peut aussi renvoyer un token ici pour que l'user soit connecté direct | Réponse : NON
+    // --- AJOUT JWT ---
+    
+    // 1. On prépare les infos à mettre dans le badge (Payload)
+    const payload = {
+      user: {
+        id: user.id,
+        role: user.role // Utile pour savoir si c'est un admin plus tard
+      }
+    };
+
+    // 2. On signe le token
+    jwt.sign(
+      payload,
+      "secret_jwt_temporaire", 
+      { expiresIn: '24h' }, // Le token expire dans 24h
+      (err, token) => {
+        if (err) throw err;
+        
+        // 3. On renvoie le token au Frontend
+        res.status(201).json({
+          msg: "Inscription réussie !",
+          token: token, //  React va stocker le token
+          user: { id: newUser._id },
+        });
+      }
+    );
+
     res.status(201).json({ msg: "Inscription réussie !", userId: newUser._id });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -67,7 +93,7 @@ router.post("/login", async (req, res) => {
         res.json({
           msg: "Connexion OK",
           token: token, //  React va stocker le token
-          user: { id: user._id, nom: user.nom, role: user.role },
+          user: { id: user._id },
         });
       }
     );
