@@ -29,7 +29,6 @@ import SignIn from "./SignIn";
 import Booking from "./Booking";
 import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Profile from "./Profile";
 
 function App() {
   return (
