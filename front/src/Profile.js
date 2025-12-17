@@ -307,24 +307,22 @@ function Profile() {
                     hover
                     sx={{ "&:last-child td": { border: 0 } }}
                   >
-                    <TableCell>{booking.offer?.titre || "N/A"}</TableCell>
+                    <TableCell>{booking.offerId?.title || "N/A"}</TableCell>
                     <TableCell>
-                      {new Date(booking.date_arrivee).toLocaleDateString(
-                        "fr-FR"
-                      )}
+                      {new Date(booking.startDate).toLocaleDateString("fr-FR")}
                     </TableCell>
                     <TableCell>
-                      {new Date(booking.date_depart).toLocaleDateString(
+                      {new Date(booking.endDate).toLocaleDateString(
                         "fr-FR"
                       )}
                     </TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>
-                      {booking.prix_total}€
+                      {booking.totalPrice}€
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={getStatusLabel(booking.statut)}
-                        color={getStatusColor(booking.statut)}
+                        label={getStatusLabel(booking.status)}
+                        color={getStatusColor(booking.status)}
                         size="small"
                       />
                     </TableCell>
