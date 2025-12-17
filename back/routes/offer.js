@@ -2,9 +2,12 @@ const express = require("express");
 const router = express.Router();
 const { auth, adminAuth } = require("../middleware/auth");
 
-const { Offer } = require("../models/Offer");
+const { Offer } = require("../models/offer");
+// Import du middleware d'authentification
+const auth = require('../middleware/auth');
 
 // 1. GET /api/offers (Récupérer tout + Filtres)
+// Cette route reste publique (pas de 'auth') pour que tout le monde puisse voir les offres
 router.get("/", async (req, res) => {
   try {
     const filter = {};
@@ -36,6 +39,7 @@ router.get("/", async (req, res) => {
 });
 
 // 2. GET /api/offers/:id (Détail d'une offre)
+// Publique aussi
 router.get("/:id", async (req, res) => {
   try {
     const offer = await Offer.findById(req.params.id).populate(
@@ -63,8 +67,14 @@ router.get("/:id", async (req, res) => {
 });
 
 // 3. POST /api/offers (Création)
+// PROTEGE : On ajoute 'auth' avant la fonction async
 router.post("/", auth, async (req, res) => {
   try {
+    // On supprime l'ID si jamais il est envoyé dans le body
+    delete req.body._id;
+    // On force le propriétaire de l'offre à être celui identifié par le Token
+    req.body.ownerId = req.auth.userId;
+
     const newOffer = await Offer.create(req.body);
     res.status(201).json({
       status: 201,
@@ -81,8 +91,17 @@ router.post("/", auth, async (req, res) => {
 });
 
 // 4. PUT /api/offers/:id (Mise à jour)
+// PROTEGE : Seul un utilisateur connecté peut modifier
 router.put("/:id", auth, async (req, res) => {
   try {
+    // --- CORRECTIF SÉCURITÉ ---
+    // On empêche toute modification de l'ID, même si l'utilisateur l'envoie.
+    // Cela évite que Mongoose ne plante avec une erreur 400.
+    delete req.body._id; 
+    // On force l'ownerId à rester celui du token (pour éviter le vol d'offre)
+    req.body.ownerId = req.auth.userId; 
+    // --------------------------
+
     const offer = await Offer.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,

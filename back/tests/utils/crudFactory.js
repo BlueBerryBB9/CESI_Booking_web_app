@@ -20,16 +20,27 @@ const generateCrudTests = (app, endpointUrl, resourceName, validPayload, updateP
                 .post(endpointUrl)
                 .send(validPayload);
             
+            // --- DEBUT DEBUG ---
+            // Si l'API renvoie une erreur 400 ou 500, on l'affiche pour comprendre
+            if (res.status !== 201) {
+                console.error(`⚠️ ERREUR CREATE ${resourceName} :`, JSON.stringify(res.body, null, 2));
+            }
+            // --- FIN DEBUG ---
+
             expect(res.status).toBe(201); // Ou 200
-            expect(res.body).toHaveProperty('id'); // Assurez-vous que votre API renvoie 'id' ou '_id'
-            createdId = res.body.id; 
+            
+            // CORRECTION : On vérifie que 'data' existe et contient '_id' (MongoDB)
+            expect(res.body.data).toHaveProperty('_id'); 
+            createdId = res.body.data._id; 
         });
 
         // 2. READ (GET One)
         it(`doit récupérer le ${resourceName} créé`, async () => {
             const res = await request(app).get(`${endpointUrl}/${createdId}`);
             expect(res.status).toBe(200);
-            expect(res.body.id).toBe(createdId);
+            
+            // CORRECTION : On vérifie l'ID dans res.body.data
+            expect(res.body.data._id).toBe(createdId);
         });
 
         // 3. UPDATE SÉCURISÉ (PUT/PATCH) - Votre correctif critique
@@ -39,25 +50,30 @@ const generateCrudTests = (app, endpointUrl, resourceName, validPayload, updateP
                 .send(updatePayload); // Envoi d'une mise à jour partielle
 
             expect(res.status).toBe(200);
-            expect(res.body.id).toBe(createdId); // Vérif cruciale
+            
+            // CORRECTION : On vérifie que l'ID n'a pas bougé (dans .data)
+            expect(res.body.data._id).toBe(createdId); 
             
             // Vérifier que la modif a eu lieu
             const keys = Object.keys(updatePayload);
             if (keys.length > 0) {
-                expect(res.body[keys[0]]).toBe(updatePayload[keys[0]]);
+                // CORRECTION : On vérifie la valeur modifiée dans .data
+                expect(res.body.data[keys[0]]).toBe(updatePayload[keys[0]]);
             }
         });
 
         // 4. SECURITY CHECK (Le test "Anti-Hack")
         it(`SÉCURITÉ: doit ignorer une tentative de modification d'ID`, async () => {
-            const hackPayload = { ...updatePayload, id: '99999-HACK' };
+            // CORRECTION : On essaie de hacker '_id' (Mongo) et pas 'id'
+            const hackPayload = { ...updatePayload, _id: '507f1f77bcf86cd799439011' };
             
             const res = await request(app)
                 .put(`${endpointUrl}/${createdId}`)
                 .send(hackPayload);
 
             expect(res.status).toBe(200);
-            expect(res.body.id).toBe(createdId); // L'ID doit rester l'original
+            // CORRECTION : L'ID original doit être conservé
+            expect(res.body.data._id).toBe(createdId); 
         });
 
         // 5. DELETE
