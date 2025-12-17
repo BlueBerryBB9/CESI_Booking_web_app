@@ -5,10 +5,16 @@ const router = express.Router();
 const { Booking } = require("../models/booking");
 // Import du modèle Offer pour vérifier le prix
 const { Offer } = require("../models/offer");
+// Import du middleware d'authentification
+const auth = require('../middleware/auth');
 
 // 1. GET /api/bookings (Récupérer toutes les réservations)
-router.get("/", async (req, res) => {
+// PROTEGE : On ne veut pas que n'importe qui voie tout l'historique
+router.get("/", auth, async (req, res) => {
   try {
+    // Optionnel : On pourrait filtrer ici pour ne renvoyer que les réservations de l'user connecté
+    // const bookings = await Booking.find({ userId: req.auth.userId })...
+    
     const bookings = await Booking.find()
       .populate("userId", "nom email")
       .populate("offerId")
@@ -28,7 +34,7 @@ router.get("/", async (req, res) => {
 });
 
 // 2. GET /api/bookings/:id (Détail d'une réservation)
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id)
       .populate("userId", "nom email")
@@ -54,7 +60,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // 3. GET /api/bookings/user/:uid (Historique d'un utilisateur)
-router.get("/user/:uid", async (req, res) => {
+router.get("/user/:uid", auth, async (req, res) => {
   try {
     const bookings = await Booking.find({ userId: req.params.uid })
       .populate("offerId")
@@ -74,9 +80,14 @@ router.get("/user/:uid", async (req, res) => {
 });
 
 // 4. POST /api/bookings (Créer une réservation)
-router.post("/", async (req, res) => {
+// PROTEGE : Il faut être connecté pour réserver
+router.post("/", auth, async (req, res) => {
   try {
-    const { userId, offerId, quantity = 1, startDate, endDate } = req.body;
+    // Sécurité : on force le userId à être celui du token (on ignore ce qui est envoyé dans le body)
+    const userId = req.auth.userId;
+    delete req.body._id; // On empêche l'injection d'ID
+
+    const { offerId, quantity = 1, startDate, endDate } = req.body;
 
     // A. Vérifier si l'offre existe
     const offer = await Offer.findById(offerId);
@@ -102,7 +113,7 @@ router.post("/", async (req, res) => {
 
     // C. Création
     const newBooking = new Booking({
-      userId,
+      userId, // On utilise l'ID sécurisé
       offerId,
       startDate,
       endDate,
@@ -127,8 +138,10 @@ router.post("/", async (req, res) => {
 });
 
 // 5. PUT /api/bookings/:id (Mise à jour d'une réservation)
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
+    delete req.body._id; // Sécurité
+    
     const { status, quantity, startDate, endDate } = req.body;
 
     // Récupérer la réservation existante
@@ -181,7 +194,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // 6. DELETE /api/bookings/:id (Suppression d'une réservation)
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     const booking = await Booking.findByIdAndDelete(req.params.id);
     if (!booking) {
