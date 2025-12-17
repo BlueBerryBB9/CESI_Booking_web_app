@@ -24,14 +24,11 @@ import {
   useTheme,
   CircularProgress,
 } from "@mui/material";
-import {
-  Login,
-  Menu as MenuIcon,
-  Logout,
-} from "@mui/icons-material";
+import { Login, Menu as MenuIcon, Logout } from "@mui/icons-material";
 import SignIn from "./SignIn";
 import Booking from "./Booking";
 import { useAuth } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -42,7 +39,8 @@ function App() {
 
         {/* Routes */}
         <Routes>
-          <Route path="/" element={<Booking />} />
+          {/*<Route path="/" element={<ProtectedRoute element={<Booking />} />} />*/}
+          <Route path="/" element={<Booking/>} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -151,7 +149,10 @@ function Navbar() {
                   <CircularProgress size={24} />
                 ) : user ? (
                   <>
-                    <Typography variant="body2" sx={{ color: "#667eea", fontWeight: 600 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "#667eea", fontWeight: 600 }}
+                    >
                       {user.nom || user.email}
                     </Typography>
                     <Button
