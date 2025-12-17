@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const User = require("../models/user");
 const dotenv = require("dotenv");
 
-dotenv.config({ path: "./config/.env" });
+dotenv.config({ path: "./config/.env.local" });
 
 // Inscription (POST /api/auth/register)
 router.post("/register", async (req, res) => {

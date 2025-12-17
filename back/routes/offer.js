@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { Offer } = require("../models/Offer");
+const { Offer } = require("../models/offer");
 
 // 1. GET /api/offers (Récupérer tout + Filtres)
 router.get("/", async (req, res) => {
@@ -82,6 +82,12 @@ router.post("/", async (req, res) => {
 // 4. PUT /api/offers/:id (Mise à jour)
 router.put("/:id", async (req, res) => {
   try {
+    // --- CORRECTIF SÉCURITÉ ---
+    // On empêche toute modification de l'ID, même si l'utilisateur l'envoie.
+    // Cela évite que Mongoose ne plante avec une erreur 400.
+    delete req.body._id; 
+    // --------------------------
+
     const offer = await Offer.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,

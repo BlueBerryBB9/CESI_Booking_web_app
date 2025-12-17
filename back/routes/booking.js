@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 
 // Import du modèle Booking
-const { Booking } = require("../models/Booking");
+const { Booking } = require("../models/booking");
 // Import du modèle Offer pour vérifier le prix
-const { Offer } = require("../models/Offer");
+const { Offer } = require("../models/offer");
 
 // 1. GET /api/bookings (Récupérer toutes les réservations)
 router.get("/", async (req, res) => {
