@@ -38,31 +38,43 @@ const getHeaders = (includeAuth = false) => {
 // AUTH API
 // ========================
 export const authAPI = {
-    // Register a new user
-    register: async (userData) => {
-        console.log("Registering user:", userData);
-        const response = await fetch(`${API_BASE_URL}/auth/register`, {
-            method: "POST",
-            headers: getHeaders(),
-            body: JSON.stringify(userData),
-        });
-        const result = await handleResponse(response);
-        console.log("Registration response:", result);
-        return result;
-    },
+  // Register a new user
+  register: async (userData) => {
+    console.log("Registering user:", userData);
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(userData),
+    });
+    const result = await handleResponse(response);
+    console.log("Registration response:", result);
+    return result;
+  },
 
-    // Login user
-    login: async (credentials) => {
-        console.log("Logging in user:", credentials);
-        const response = await fetch(`${API_BASE_URL}/auth/login`, {
-            method: "POST",
-            headers: getHeaders(),
-            body: JSON.stringify(credentials),
-        });
-        const result = await handleResponse(response);
-        console.log("Login response:", result);
-        return result;
-    },
+  // Login user
+  login: async (credentials) => {
+    console.log("Logging in user:", credentials);
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(credentials),
+    });
+    const result = await handleResponse(response);
+    console.log("Login response:", result);
+    return result;
+  },
+
+  profile: async (credentials) => {
+    console.log("Logging in user:", credentials);
+    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(credentials),
+    });
+    const result = await handleResponse(response);
+    console.log("Login response:", result);
+    return result;
+  },
 };
 
 // ========================
