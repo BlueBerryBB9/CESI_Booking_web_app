@@ -90,6 +90,60 @@ export const authAPI = {
 };
 
 // ========================
+// USERS API
+// ========================
+export const usersAPI = {
+  // Get all users
+  getAll: async () => {
+    console.log("Fetching all users");
+    const response = await fetch(`${API_BASE_URL}/users`, {
+      method: "GET",
+      headers: getHeaders(true),
+    });
+    const result = await handleResponse(response);
+    console.log("Users response:", result);
+    return result;
+  },
+
+  // Get a single user by ID
+  getById: async (userId) => {
+    console.log("Fetching user by ID:", userId);
+    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+      method: "GET",
+      headers: getHeaders(true),
+    });
+    const result = await handleResponse(response);
+    console.log("User response:", result);
+    return result;
+  },
+
+  // Update a user
+  update: async (userId, userData) => {
+    console.log("Updating user:", userId, userData);
+    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+      method: "PUT",
+      headers: getHeaders(true),
+      body: JSON.stringify(userData),
+    });
+    const result = await handleResponse(response);
+    console.log("User update response:", result);
+    return result;
+  },
+
+  // Delete a user
+  delete: async (userId) => {
+    console.log("Deleting user:", userId);
+    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+      method: "DELETE",
+      headers: getHeaders(true),
+    });
+    const result = await handleResponse(response);
+    console.log("User deletion response:", result);
+    return result;
+  },
+};
+
+// ========================
 // OFFERS API
 // ========================
 export const offersAPI = {
@@ -247,6 +301,7 @@ export const bookingsAPI = {
 // Export a default object with all APIs
 const api = {
   auth: authAPI,
+  users: usersAPI,
   offers: offersAPI,
   bookings: bookingsAPI,
 };

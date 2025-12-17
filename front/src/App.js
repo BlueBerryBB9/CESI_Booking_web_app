@@ -24,9 +24,11 @@ import {
   useTheme,
   CircularProgress,
 } from "@mui/material";
-import { Login, Menu as MenuIcon, Logout } from "@mui/icons-material";
+import { Login, Menu as MenuIcon, Logout, Person } from "@mui/icons-material";
 import SignIn from "./SignIn";
 import Booking from "./Booking";
+import Profile from "./Profile";
+import AdminDashboard from "./AdminDashboard";
 import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -42,6 +44,14 @@ function App() {
           {/*<Route path="/" element={<ProtectedRoute element={<Booking />} />} />*/}
           <Route path="/" element={<Booking />} />
           <Route path="/signin" element={<SignIn />} />
+          <Route
+            path="/profile"
+            element={<ProtectedRoute element={<Profile />} />}
+          />
+          <Route
+            path="/admin"
+            element={<ProtectedRoute element={<AdminDashboard />} />}
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Box>
@@ -79,6 +89,19 @@ function Navbar() {
                   <Login />
                 </ListItemIcon>
                 <ListItemText primary={`${user.nom || user.email}`} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  navigate("/profile");
+                  handleDrawerToggle();
+                }}
+              >
+                <ListItemIcon sx={{ color: "#667eea" }}>
+                  <Person />
+                </ListItemIcon>
+                <ListItemText primary="Mon profil" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -155,6 +178,41 @@ function Navbar() {
                     >
                       {user.nom || user.email}
                     </Typography>
+                    <Button
+                      component={Link}
+                      to="/profile"
+                      variant="outlined"
+                      size="small"
+                      startIcon={<Person />}
+                      sx={{
+                        color: "#667eea",
+                        borderColor: "#667eea",
+                        textTransform: "none",
+                        "&:hover": {
+                          bgcolor: "#f0f4ff",
+                        },
+                      }}
+                    >
+                      Profil
+                    </Button>
+                    {user.role === "admin" && (
+                      <Button
+                        component={Link}
+                        to="/admin"
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                          color: "#667eea",
+                          borderColor: "#667eea",
+                          textTransform: "none",
+                          "&:hover": {
+                            bgcolor: "#f0f4ff",
+                          },
+                        }}
+                      >
+                        Admin
+                      </Button>
+                    )}
                     <Button
                       variant="contained"
                       startIcon={<Logout />}

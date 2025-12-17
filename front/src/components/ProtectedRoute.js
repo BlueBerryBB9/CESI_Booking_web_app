@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { CircularProgress, Box } from "@mui/material";
 
 function ProtectedRoute({ element }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
 
   // Show loading spinner while checking authentication
   if (loading) {
@@ -22,9 +22,8 @@ function ProtectedRoute({ element }) {
   }
 
   // Redirect to signin if not authenticated
-  if (!isAuthenticated) {
-    return <Navigate to="/signin" replace />;
-  }
+  if (!isAuthenticated || user.role !== "admin")
+    return <Navigate to="/" replace />;
 
   // Render the component if authenticated
   return element;
