@@ -1,18 +1,30 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 
 require("dotenv").config({ path: ".env.local" });
 
 const app = express();
 
 // Middleware
-// CORS : Indispensable quand le Frontend (React) et le Backend ne sont pas sur le même port.
-// Sans ça, le navigateur bloque la connexion par sécurité.
 app.use(cors());
-// JSON Parser : Permet au serveur de comprendre les données envoyées par le Frontend.
-// Sans ça, 'req.body' serait vide quand on reçoit un formulaire.
 app.use(express.json());
+
+// JWT Authentication Middleware
+app.use((req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.auth = decoded;
+    } catch (err) {
+      console.error("JWT verification failed:", err.message);
+    }
+  }
+  next();
+});
 
 // Connect to MongoDB
 async function connectDB() {
@@ -43,7 +55,6 @@ app.get("/", (req, res) => {
 // Start server with async initialization
 async function startServer() {
   await connectDB();
-  // On ne lance le .listen que si ce n'est PAS un test
   if (require.main === module) {
     app.listen(8080, () => {
       console.log("Serveur lancé sur http://localhost:8080");

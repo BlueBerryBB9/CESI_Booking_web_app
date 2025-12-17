@@ -65,12 +65,19 @@ function AdminDashboard() {
   const [openDialog, setOpenDialog] = useState(false);
   const [editingOffer, setEditingOffer] = useState(null);
   const [formData, setFormData] = useState({
-    titre: "",
+    title: "",
     description: "",
     price: "",
     type: "",
     "location.city": "",
     "location.country": "",
+    "place.address": "",
+    "place.capacity": "",
+    "activity.schedule": "",
+    "activity.difficulty": "",
+    "transportation.departure": "",
+    "transportation.arrival": "",
+    "transportation.duration": "",
   });
 
   // Fetch data on component mount
@@ -105,22 +112,36 @@ function AdminDashboard() {
     if (offer) {
       setEditingOffer(offer);
       setFormData({
-        titre: offer.titre,
-        description: offer.description,
-        price: offer.price,
-        type: offer.type,
+        title: offer.title || "",
+        description: offer.description || "",
+        price: offer.price || "",
+        type: offer.type || "",
         "location.city": offer.location?.city || "",
         "location.country": offer.location?.country || "",
+        "place.address": offer.place?.address || "",
+        "place.capacity": offer.place?.capacity || "",
+        "activity.schedule": offer.activity?.schedule || "",
+        "activity.difficulty": offer.activity?.difficulty || "",
+        "transportation.departure": offer.transportation?.departure || "",
+        "transportation.arrival": offer.transportation?.arrival || "",
+        "transportation.duration": offer.transportation?.duration || "",
       });
     } else {
       setEditingOffer(null);
       setFormData({
-        titre: "",
+        title: "",
         description: "",
         price: "",
         type: "",
         "location.city": "",
         "location.country": "",
+        "place.address": "",
+        "place.capacity": "",
+        "activity.schedule": "",
+        "activity.difficulty": "",
+        "transportation.departure": "",
+        "transportation.arrival": "",
+        "transportation.duration": "",
       });
     }
     setOpenDialog(true);
@@ -145,7 +166,7 @@ function AdminDashboard() {
   const handleSaveOffer = async () => {
     try {
       const payload = {
-        titre: formData.titre,
+        title: formData.title,
         description: formData.description,
         price: parseFloat(formData.price),
         type: formData.type,
@@ -154,6 +175,25 @@ function AdminDashboard() {
           country: formData["location.country"],
         },
       };
+
+      // Add type-specific fields
+      if (formData.type === "place") {
+        payload.place = {
+          address: formData["place.address"],
+          capacity: parseInt(formData["place.capacity"]),
+        };
+      } else if (formData.type === "activity") {
+        payload.activity = {
+          schedule: formData["activity.schedule"],
+          difficulty: formData["activity.difficulty"],
+        };
+      } else if (formData.type === "transportation") {
+        payload.transportation = {
+          departure: formData["transportation.departure"],
+          arrival: formData["transportation.arrival"],
+          duration: parseInt(formData["transportation.duration"]),
+        };
+      }
 
       if (editingOffer) {
         await offersAPI.update(editingOffer._id, payload);
@@ -530,8 +570,8 @@ function AdminDashboard() {
           <TextField
             fullWidth
             label="Titre"
-            name="titre"
-            value={formData.titre}
+            name="title"
+            value={formData.title}
             onChange={handleFormChange}
             sx={{ mb: 2 }}
           />
@@ -547,12 +587,19 @@ function AdminDashboard() {
           />
           <TextField
             fullWidth
+            select
             label="Type"
             name="type"
             value={formData.type}
             onChange={handleFormChange}
             sx={{ mb: 2 }}
-          />
+            SelectProps={{ native: true }}
+          >
+            <option value="">Sélectionner un type</option>
+            <option value="place">Lieu</option>
+            <option value="activity">Activité</option>
+            <option value="transportation">Transport</option>
+          </TextField>
           <TextField
             fullWidth
             label="Prix"
@@ -576,7 +623,93 @@ function AdminDashboard() {
             name="location.country"
             value={formData["location.country"]}
             onChange={handleFormChange}
+            sx={{ mb: 2 }}
           />
+
+          {/* Conditional fields for PLACE */}
+          {formData.type === "place" && (
+            <>
+              <TextField
+                fullWidth
+                label="Adresse"
+                name="place.address"
+                value={formData["place.address"]}
+                onChange={handleFormChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Capacité"
+                name="place.capacity"
+                type="number"
+                value={formData["place.capacity"]}
+                onChange={handleFormChange}
+                sx={{ mb: 2 }}
+              />
+            </>
+          )}
+
+          {/* Conditional fields for ACTIVITY */}
+          {formData.type === "activity" && (
+            <>
+              <TextField
+                fullWidth
+                label="Date et Heure"
+                name="activity.schedule"
+                type="datetime-local"
+                value={formData["activity.schedule"]}
+                onChange={handleFormChange}
+                sx={{ mb: 2 }}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                fullWidth
+                select
+                label="Difficultés"
+                name="activity.difficulty"
+                value={formData["activity.difficulty"]}
+                onChange={handleFormChange}
+                sx={{ mb: 2 }}
+                SelectProps={{ native: true }}
+              >
+                <option value="">Sélectionner une difficulté</option>
+                <option value="easy">Facile</option>
+                <option value="medium">Moyen</option>
+                <option value="hard">Difficile</option>
+              </TextField>
+            </>
+          )}
+
+          {/* Conditional fields for TRANSPORTATION */}
+          {formData.type === "transportation" && (
+            <>
+              <TextField
+                fullWidth
+                label="Départ"
+                name="transportation.departure"
+                value={formData["transportation.departure"]}
+                onChange={handleFormChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Arrivée"
+                name="transportation.arrival"
+                value={formData["transportation.arrival"]}
+                onChange={handleFormChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Durée (en minutes)"
+                name="transportation.duration"
+                type="number"
+                value={formData["transportation.duration"]}
+                onChange={handleFormChange}
+                sx={{ mb: 2 }}
+              />
+            </>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Annuler</Button>

@@ -70,7 +70,7 @@ router.post("/", auth, async (req, res) => {
     // On supprime l'ID si jamais il est envoyé dans le body
     delete req.body._id;
     // On force le propriétaire de l'offre à être celui identifié par le Token
-    req.body.ownerId = req.auth.userId;
+    req.body.ownerId = req.user?.id;
 
     const newOffer = await Offer.create(req.body);
     res.status(201).json({
@@ -79,6 +79,7 @@ router.post("/", auth, async (req, res) => {
       data: newOffer,
     });
   } catch (err) {
+    console.log(err);
     res.status(400).json({
       status: 400,
       message: "Erreur lors de la création",
@@ -94,9 +95,9 @@ router.put("/:id", auth, async (req, res) => {
     // --- CORRECTIF SÉCURITÉ ---
     // On empêche toute modification de l'ID, même si l'utilisateur l'envoie.
     // Cela évite que Mongoose ne plante avec une erreur 400.
-    delete req.body._id; 
+    delete req.body._id;
     // On force l'ownerId à rester celui du token (pour éviter le vol d'offre)
-    req.body.ownerId = req.auth.userId; 
+    req.body.ownerId = req.user?.id;
     // --------------------------
 
     const offer = await Offer.findByIdAndUpdate(req.params.id, req.body, {
