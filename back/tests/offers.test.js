@@ -1,9 +1,9 @@
 const app = require('../index'); // Pointe vers index.js
 const generateCrudTests = require('./utils/crudFactory');
+const request = require('supertest');
 const mongoose = require('mongoose');
-
-// On génère un faux ID car le modèle exige un "ownerId" valide
-const fakeOwnerId = new mongoose.Types.ObjectId();
+const User = require('../models/user');
+const bcrypt = require('bcryptjs');
 
 // 1. Payload de Création (Doit respecter le Schema Mongoose)
 const validOfferPayload = {
@@ -11,7 +11,6 @@ const validOfferPayload = {
     title: "Super Villa de Test",
     description: "Une villa incroyable pour les tests",
     price: 150,
-    ownerId: fakeOwnerId, // Indispensable !
     place: {
         address: "10 rue des Tests, Paris",
         capacity: 5
@@ -31,6 +30,28 @@ const updateOfferPayload = {
 
 // 3. Lancement des tests
 describe('CRUD Automatisé pour: Offer', () => {
-    // CORRECTION : J'ai ajouté le paramètre 'Offer' en 3ème position
-    generateCrudTests(app, '/offers', 'Offer', validOfferPayload, updateOfferPayload);
+    let authToken;
+
+    beforeAll(async () => {
+        // Clean test user
+        await User.deleteMany({ email: 'offerstest@example.com' });
+        
+        // Create a test admin user
+        const hashedPassword = await bcrypt.hash('password123', 10);
+        const user = await User.create({
+            nom: 'Admin User',
+            email: 'offerstest@example.com',
+            password: hashedPassword,
+            role: 'admin'
+        });
+
+        // Login to get token
+        const loginRes = await request(app)
+            .post('/auth/login')
+            .send({ email: 'offerstest@example.com', password: 'password123' });
+        authToken = loginRes.body.token;
+    });
+
+    // CORRECTION : J'ai ajouté le paramètre authToken
+    generateCrudTests(app, '/offers', 'Offer', validOfferPayload, updateOfferPayload, () => authToken);
 });
