@@ -182,7 +182,7 @@ router.put("/:id", adminAuth, async (req, res) => {
 });
 
 // 6. DELETE /api/bookings/:id (Suppression d'une réservation)
-router.delete("/:id", adminAuth, async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     const booking = await Booking.findByIdAndDelete(req.params.id);
     if (!booking) {

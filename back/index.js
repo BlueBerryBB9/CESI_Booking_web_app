@@ -27,10 +27,12 @@ async function connectDB() {
 
 // Routes
 const authRoutes = require("./routes/auth");
+const usersRoutes = require("./routes/users");
 const offerRoutes = require("./routes/offer");
 const bookingRoutes = require("./routes/booking");
 
 app.use("/auth", authRoutes);
+app.use("/users", usersRoutes);
 app.use("/offers", offerRoutes);
 app.use("/bookings", bookingRoutes);
 

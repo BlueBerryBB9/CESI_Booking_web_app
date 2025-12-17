@@ -1,10 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { auth, adminAuth } = require("../middleware/auth");
-
 const { Offer } = require("../models/offer");
-// Import du middleware d'authentification
-const auth = require('../middleware/auth');
 
 // 1. GET /api/offers (Récupérer tout + Filtres)
 // Cette route reste publique (pas de 'auth') pour que tout le monde puisse voir les offres

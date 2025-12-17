@@ -30,7 +30,7 @@ import api from "./services/api";
 
 function Profile() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,22 +44,34 @@ function Profile() {
     email: user?.email || "",
   });
 
-  const fetchUserBookings = async () => {
-    try {
-      setLoading(true);
-      const response = await api.bookings.getByUserId(user.id);
-      setBookings(response.data || []);
-      setError(null);
-    } catch (err) {
-      setError(err.message || "Erreur lors du chargement des réservations");
-    } finally {
-      setLoading(false);
+  // Sync form data when user changes
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        nom: user.nom || "",
+        email: user.email || "",
+      });
     }
-  };
+  }, [user?.id, user?.nom, user?.email]);
 
   useEffect(() => {
-    fetchUserBookings();
-  }, [user, navigate]);
+    const fetchUserBookings = async () => {
+      try {
+        setLoading(true);
+        const response = await api.bookings.getByUserId(user.id);
+        setBookings(response.data || []);
+        setError(null);
+      } catch (err) {
+        setError(err.message || "Erreur lors du chargement des réservations");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user?.id) {
+      fetchUserBookings();
+    }
+  }, [user?.id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

@@ -44,10 +44,7 @@ function App() {
           {/*<Route path="/" element={<ProtectedRoute element={<Booking />} />} />*/}
           <Route path="/" element={<Booking />} />
           <Route path="/signin" element={<SignIn />} />
-          <Route
-            path="/profile"
-            element={<ProtectedRoute element={<Profile />} />}
-          />
+          <Route path="/profile" element={<Profile />} />
           <Route
             path="/admin"
             element={<ProtectedRoute element={<AdminDashboard />} />}
