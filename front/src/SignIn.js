@@ -297,55 +297,8 @@ function SignIn() {
                 </MuiLink>
               </Typography>
             </Box>
-
-            {isSignIn && (
-              <Box sx={{ textAlign: "center", mt: 2 }}>
-                <MuiLink
-                  component="button"
-                  type="button"
-                  disabled={loading}
-                  sx={{
-                    color: "text.secondary",
-                    fontSize: "0.875rem",
-                    textDecoration: "underline",
-                    cursor: "pointer",
-                    border: "none",
-                    background: "none",
-                    "&:hover": {
-                      color: "#667eea",
-                    },
-                    "&:disabled": {
-                      color: "#ccc",
-                      cursor: "not-allowed",
-                    },
-                  }}
-                >
-                  Mot de passe oublié ?
-                </MuiLink>
-              </Box>
-            )}
           </CardContent>
         </Card>
-
-        <Box sx={{ textAlign: "center", mt: 3 }}>
-          <Button
-            variant="text"
-            onClick={() => navigate("/")}
-            disabled={loading}
-            sx={{
-              color: "white",
-              textTransform: "none",
-              "&:hover": {
-                bgcolor: "rgba(255, 255, 255, 0.1)",
-              },
-              "&:disabled": {
-                color: "rgba(255, 255, 255, 0.5)",
-              },
-            }}
-          >
-            ← Retour à l'accueil
-          </Button>
-        </Box>
       </Container>
     </Box>
   );

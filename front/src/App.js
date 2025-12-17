@@ -29,6 +29,7 @@ import SignIn from "./SignIn";
 import Booking from "./Booking";
 import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Profile from "./Profile";
 
 function App() {
   return (
@@ -40,7 +41,7 @@ function App() {
         {/* Routes */}
         <Routes>
           {/*<Route path="/" element={<ProtectedRoute element={<Booking />} />} />*/}
-          <Route path="/" element={<Booking/>} />
+          <Route path="/" element={<Booking />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -62,9 +63,9 @@ function Navbar() {
   };
 
   const handleLogout = () => {
+    setMobileOpen(false);
     logout();
-    navigate("/");
-    handleDrawerToggle();
+    navigate("/signin");
   };
 
   // Menu mobile (Drawer)
