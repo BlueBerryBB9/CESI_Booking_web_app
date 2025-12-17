@@ -5,6 +5,7 @@ const API_BASE_URL = "http://localhost:8080";
 // Helper function to handle API errors
 const handleResponse = async (response) => {
   const data = await response.json();
+  console.log(data);
 
   if (!response.ok) {
     throw new Error(data.error || data.message || "Une erreur est survenue");

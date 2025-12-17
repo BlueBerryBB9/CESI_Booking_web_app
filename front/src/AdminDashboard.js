@@ -23,6 +23,7 @@ import {
   CircularProgress,
   Alert,
   Grid,
+  MenuItem,
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
 import {
@@ -32,11 +33,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from "recharts";
 import { bookingsAPI, offersAPI } from "./services/api";
 
@@ -72,6 +69,7 @@ function AdminDashboard() {
     "location.city": "",
     "location.country": "",
   });
+  const [user, setUser] = useState(null);
 
   // Fetch data on component mount
   useEffect(() => {
@@ -85,6 +83,9 @@ function AdminDashboard() {
         setBookings(bookingsData.data || []);
         setOffers(offersData.data || []);
         setError(null);
+        // Get current user from localStorage or your auth service
+        const userData = JSON.parse(localStorage.getItem("user")) || {};
+        setUser(userData);
       } catch (err) {
         setError(err.message || "Erreur lors du chargement des données");
       } finally {
@@ -153,11 +154,13 @@ function AdminDashboard() {
           city: formData["location.city"],
           country: formData["location.country"],
         },
+        userId: user?.id
       };
 
       if (editingOffer) {
         await offersAPI.update(editingOffer._id, payload);
       } else {
+        console.log("Editing Offer ?");
         await offersAPI.create(payload);
       }
 
@@ -166,6 +169,8 @@ function AdminDashboard() {
       setOffers(updatedOffers.data || []);
       handleCloseDialog();
     } catch (err) {
+      console.log(err);
+      console.log(err.message);
       setError(err.message || "Erreur lors de la sauvegarde");
     }
   };
@@ -547,12 +552,18 @@ function AdminDashboard() {
           />
           <TextField
             fullWidth
+            select
             label="Type"
             name="type"
             value={formData.type}
             onChange={handleFormChange}
             sx={{ mb: 2 }}
-          />
+          >
+            <MenuItem value="">Sélectionner un type</MenuItem>
+            <MenuItem value="activity">Activity</MenuItem>
+            <MenuItem value="place">Place</MenuItem>
+            <MenuItem value="transportation">Transportation</MenuItem>
+          </TextField>
           <TextField
             fullWidth
             label="Prix"
