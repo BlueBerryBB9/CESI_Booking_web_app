@@ -14,17 +14,6 @@ app.use(cors());
 // Sans ça, 'req.body' serait vide quand on reçoit un formulaire.
 app.use(express.json());
 
-// --- POUR TESTER ---
-// Sans ça, la création d'offre plante car req.user n'existe pas.
-// À SUPPRIMER plus tard quand le login Front sera fini.
-app.use((req, res, next) => {
-    req.user = {
-        id: "694159a75f141ed09db037f3", 
-        role: "admin"
-    };
-    next();
-});
-
 // Connect to MongoDB
 async function connectDB() {
   try {
@@ -54,9 +43,9 @@ async function startServer() {
   await connectDB();
   // On ne lance le .listen que si ce n'est PAS un test
   if (require.main === module) {
-      app.listen(8080, () => {
-        console.log("Serveur lancé sur http://localhost:8080");
-      });
+    app.listen(8080, () => {
+      console.log("Serveur lancé sur http://localhost:8080");
+    });
   }
 }
 

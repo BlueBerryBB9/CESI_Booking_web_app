@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { auth, adminAuth } = require("../middleware/auth");
 
 const { Offer } = require("../models/Offer");
 
@@ -16,7 +17,7 @@ router.get("/", async (req, res) => {
     if (req.query.type) {
       filter.type = req.query.type;
     }
-    
+
     // .populate('ownerId') permet d'afficher le nom du créateur de l'offre
     const offers = await Offer.find(filter).populate("ownerId", "nom email");
 
@@ -62,7 +63,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // 3. POST /api/offers (Création)
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   try {
     const newOffer = await Offer.create(req.body);
     res.status(201).json({
@@ -80,7 +81,7 @@ router.post("/", async (req, res) => {
 });
 
 // 4. PUT /api/offers/:id (Mise à jour)
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
     const offer = await Offer.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -108,7 +109,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // 5. DELETE /api/offers/:id (Suppression)
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", adminAuth, async (req, res) => {
   try {
     const offer = await Offer.findByIdAndDelete(req.params.id);
     if (!offer) {

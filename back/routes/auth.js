@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const dotenv = require("dotenv");
+const { auth } = require("../middleware/auth");
 
 dotenv.config({ path: "./config/.env" });
 
@@ -25,37 +26,9 @@ router.post("/register", async (req, res) => {
     const newUser = new User({ nom, email, password: hashedPassword });
     await newUser.save();
 
-    // --- AJOUT JWT ---
-
-    // 1. On prépare les infos à mettre dans le badge (Payload)
-    const payload = {
-      user: {
-        id: newUser.id,
-        role: newUser.role, // Utile pour savoir si c'est un admin plus tard
-      },
-    };
-
-    // 2. On signe le token
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: "24h" }, // Le token expire dans 24h
-      (err, token) => {
-        if (err) throw err;
-
-        // 3. On renvoie le token au Frontend
-        res.status(201).json({
-          msg: "Inscription réussie !",
-          token: token, //  React va stocker le token
-          user: {
-            id: newUser._id,
-            nom: newUser.nom,
-            email: newUser.email,
-            role: newUser.role,
-          },
-        });
-      }
-    );
+    res.status(201).json({
+      msg: "Inscription réussie !",
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -114,14 +87,9 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.get("/me", async (req, res) => {
+router.get("/me", auth, async (req, res) => {
   try {
-    const token = req.header("Authorization")?.replace("Bearer ", "");
-    if (!token) {
-      return res.status(401).json({ error: "Pas de token, accès refusé" });
-    }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.user.id).select("-password");
+    const user = await User.findById(req.user.id).select("-password");
     if (!user) {
       return res.status(404).json({ error: "Utilisateur non trouvé" });
     }
