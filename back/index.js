@@ -16,14 +16,20 @@ app.use(express.json());
 
 // --- POUR TESTER ---
 // Sans ça, la création d'offre plante car req.user n'existe pas.
-// À SUPPRIMER plus tard quand le login Front sera fini.
-app.use((req, res, next) => {
-    req.user = {
-        id: "694159a75f141ed09db037f3", 
-        role: "admin"
-    };
-    next();
-});
+// MODIFICATION : On n'active ce bouchon QUE pour les tests (Jest)
+if (process.env.NODE_ENV === 'test') {
+    app.use((req, res, next) => {
+        req.user = {
+            id: "694159a75f141ed09db037f3", 
+            role: "admin"
+        };
+        // On simule aussi req.auth pour que le middleware auth ne manque pas
+        req.auth = {
+            userId: "694159a75f141ed09db037f3"
+        };
+        next();
+    });
+}
 
 // Connect to MongoDB
 async function connectDB() {
